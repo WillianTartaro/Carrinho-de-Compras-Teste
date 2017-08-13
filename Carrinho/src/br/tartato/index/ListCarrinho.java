@@ -65,17 +65,7 @@ public class ListCarrinho extends JFrame {
 
 		
 		JButton btnRemover = new JButton("Remover");
-		btnRemover.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				excluirProduto(modelCarrinho.getListaCarrinho().get(table.getSelectedRow()));
-			}
 
-			private void excluirProduto(Carrinho carrinho) {
-				TableCarrinho.listaCarrinho.remove(carrinho.getNome());
-				
-			}
-		});
 		btnRemover.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				excluirProduto(modelCarrinho.getListaCarrinho().get(table.getSelectedRow()));
@@ -83,7 +73,8 @@ public class ListCarrinho extends JFrame {
 
 			private void excluirProduto(Carrinho carrinho) {
 					for (int i = 0; i < TableCarrinho.listaCarrinho.size(); i++) {
-						TableCarrinho.listaCarrinho.remove(i).equals(carrinho.getNome());
+						//TableCarrinho.listaCarrinho.remove(carrinho.getNome());
+						TableCarrinho.listaCarrinho.remove(i+1).equals(carrinho.getNome());
 						
 					}
 				
