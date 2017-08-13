@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -11,6 +14,7 @@ import javax.swing.border.EmptyBorder;
 
 import br.tartaro.pojos.Carrinho;
 import br.tartaro.pojos.Produtos;
+import br.tartaro.pojos.BancoDeDados;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -30,6 +34,7 @@ public class ListaProdutos extends JFrame {
 	private JPanel contentPane;
 	private JTable table;
 	private TableProdutos model2 = new TableProdutos();
+	private TableCarrinho modelCarrinho = new TableCarrinho();
 	private JMenuBar menuBar;
 	private JMenu mnAtalhos;
 	private JMenuItem mntmCarrinho;
@@ -72,26 +77,7 @@ public class ListaProdutos extends JFrame {
 	 * Create the frame.
 	 */
 	public ListaProdutos() {
-		Produtos a = new Produtos();
-		a.setId(1);
-		a.setNome("Produto 1");
-		a.setQuantidade(10);
-		a.setValor(100.00);
-		TableProdutos.lista2.add(a);
-		
-		Produtos b = new Produtos();
-		b.setId(2);
-		b.setNome("Produto 2");
-		b.setQuantidade(5);
-		b.setValor(25.00);
-		TableProdutos.lista2.add(b);
-		
-		Produtos c = new Produtos();
-		c.setId(3);
-		c.setNome("Produto 3");
-		c.setQuantidade(2);
-		c.setValor(5.00);
-		TableProdutos.lista2.add(c);
+
 		
 		
 		setTitle("Produtos");
@@ -134,21 +120,45 @@ public class ListaProdutos extends JFrame {
 					JOptionPane.showMessageDialog(ListaProdutos.this, "Não temos essa quantidade em estoque");
 				} else {
 					JOptionPane.showMessageDialog(ListaProdutos.this, "Produto Adicionado ao Carrinho!");
+					
+					
+					Carrinho c = new Carrinho();
+					
+					c.setId(TableCarrinho.listaCarrinho.size()+1);
+					c.setNome(produto.getNome());
+					c.setQuantidade(quantCliente);
+					c.setValor(produto.getValor()*quantCliente);
+
+					modelCarrinho.adicionarNoModel(c);
+					
+					
+					produto.setId(produto.getId());
+					produto.setNome(produto.getNome());
 					int valorQuant = produto.getQuantidade();
 					produto.setQuantidade(valorQuant - quantCliente);
-					Carrinho a = new Carrinho();
-					a.setId(TableCarrinho.listaCarrinho.size()+1);
-					a.setNome(produto.getNome());
-					a.setQuantidade(produto.getQuantidade());
-					a.setValor(produto.getValor()*quantCliente);
-					TableCarrinho.listaCarrinho.add(a);
+					produto.setValor(produto.getValor());
+					
+					
+					try {
+						br.tartaro.pojos.BancoDeDados banco2 = new BancoDeDados();
+						banco2.AlteraProduto(produto);
+						banco2.GravarCarrinho(c);
+						AtualizaTabel();
+					} catch (SQLException e) {
+						// TODO: handle exception
+					}
+					
 					
 					
 				}
 			
 			}
+
+		
 		});
 		scrollPane.setViewportView(table);
+		AtualizaTabel();
+		
 		
 		lblNewLabel = new JLabel("Dê dois cliques no produto de sua escolha para adicionar ao carrinho");
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
@@ -169,5 +179,18 @@ public class ListaProdutos extends JFrame {
 		);
 		contentPane.setLayout(gl_contentPane);
 	}
+
+
+
+	private void AtualizaTabel() {
+		
+		try {
+			BancoDeDados banco = new BancoDeDados();
+			model2.setLista2(banco.produtoTabela());
+			
+		} catch (SQLException e) {
+			// TODO: handle exception
+		}	
+}
 
 }

@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import br.tartaro.pojos.Carrinho;
+import br.tartaro.pojos.BancoDeDados;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -22,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
 import java.util.List;
 
 public class ListCarrinho extends JFrame {
@@ -53,7 +55,7 @@ public class ListCarrinho extends JFrame {
 	 * Create the frame.
 	 */
 	public ListCarrinho() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setBounds(100, 100, 450, 286);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -72,11 +74,18 @@ public class ListCarrinho extends JFrame {
 			}
 
 			private void excluirProduto(Carrinho carrinho) {
-					for (int i = 0; i < TableCarrinho.listaCarrinho.size(); i++) {
-						//TableCarrinho.listaCarrinho.remove(carrinho.getNome());
-						TableCarrinho.listaCarrinho.remove(i+1).equals(carrinho.getNome());
-						
-					}
+				
+				int idproduto = carrinho.getId();
+				Carrinho c = new Carrinho();
+				c.setId(idproduto);
+				
+				try {
+					BancoDeDados banco = new BancoDeDados();
+					banco.ExcluirCarrinho(c);
+					AtualizaTabel();
+				} catch (SQLException e2) {
+					// TODO: handle exception
+				}
 				
 			}
 		});
@@ -89,7 +98,11 @@ public class ListCarrinho extends JFrame {
 					valorTotal += TableCarrinho.listaCarrinho.get(i).getValor();
 				}
 				
-				int quero = JOptionPane.showConfirmDialog(ListCarrinho.this, "O Valor total da sua compra é de : R$"+valorTotal+ "Deseja Continuar? ");
+				int quero = JOptionPane.showConfirmDialog(ListCarrinho.this, "O Valor total da sua compra é de : R$"+valorTotal+ " Deseja Continuar? ");
+				if(quero == 0){
+					DadosCliente dados = new DadosCliente();
+					dados.setVisible(true);
+				}
 			}
 		});
 		ListaProdutos pp = new ListaProdutos();
@@ -112,7 +125,7 @@ public class ListCarrinho extends JFrame {
 				.addGroup(gl_contentPane.createSequentialGroup()
 					.addGap(21)
 					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 173, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 						.addComponent(btnGerarPagamento)
 						.addComponent(btnRemover)))
@@ -120,6 +133,18 @@ public class ListCarrinho extends JFrame {
 		
 		table = new JTable(modelCarrinho);
 		scrollPane.setViewportView(table);
+		AtualizaTabel();
 		contentPane.setLayout(gl_contentPane);
 	}
+	
+	private void AtualizaTabel() {
+		
+		try {
+			BancoDeDados banco = new BancoDeDados();
+			modelCarrinho.setListaCarrinho(banco.carrinhoTabela());
+			
+		} catch (SQLException e) {
+			// TODO: handle exception
+		}	
+}
 }
